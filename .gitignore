@@ -1,0 +1,9 @@
+BLAS/
+Theano/
+*.txt
+*tgz
+*.pkl
+*.jpg
+*.gz
+*.tsv
+*.cpp
