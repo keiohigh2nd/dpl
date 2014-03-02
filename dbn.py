@@ -364,70 +364,100 @@ def chip_data(num):
         return arr
 
 def chip_data_dif(a,b):
+        threshold = 0.3
+
         f = open("Network1_expression_data.tsv")
         lines = f.readlines()
         f.close()
 
         arr = []
         i = 0
-        res = numpy.array([])
+        res = numpy.zeros(len(lines))
         for x in lines:
                 if i != 0:
                         tmp = x.split("\t")
-                        arr.append(math.fabs(float(tmp[int(a)])-float(tmp[int(b)])))
-                        numpy.append(res,math.fabs(float(tmp[int(a)])-float(tmp[int(b)])))
+                        tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
+                        if float(threshold) > tmp_d:
+                                #arr.append(1)
+                                res[i-1] = 1
+                        else:
+                                #arr.append(0)
+                                res[i-1] = 0
                 i += 1
-        return arr 
+        #return arr
+        return res
+
+def limited_for_train(a,b):
+	if a < 30 and b < 30:
+		return 1
+	else:
+		return 0
 
 def gene_data():
 	import itertools
 
+   	#convert()
+        f = open("Nw1_Ex_10.csv")
+        tmp_f = f.read()
+	lines = tmp_f.split("\r")
+        f.close()
+        tm = lines[0].split(",")
+        cols = len(tm)
+        print "Number of Genes = %d"%cols
+
         #You cannot change this part because of something excel error
-        f1 = open("DREAM5_NetworkInference_GoldStandard_Network1.tsv")
-        lins = f1.readlines()
+        f1 = open("Nw1_G_10.csv")
+	tmp_f1 = f1.read()
+        lins = tmp_f1.split("\r")
         f1.close()
-
-
-        #combi = list(itertools.combinations(range(cols), 2))
-        train = numpy.array([])
-        res_train = numpy.array([])
-
-        for y in lins:
-                tmp =  y.split("\t")
+        combi = list(itertools.combinations(range(cols), 2))
+        
+	
+	train = numpy.zeros(len(lines))
+        res_train = numpy.array([[0, 0]])
+	
+	#res_train = numpy.concatenate((res_train,numpy.array([[1,0]])),axis=0)
+	print res_train
+	#res_train = numpy.concatenate((res_train,numpy.array([[1,0]])))
+         
+	i = 0
+	for y in lins:
+                tmp =  y.split(",")
                 #print chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)
-                numpy.append(train,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1))
+                #numpy.column_stack((train,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
+                train = numpy.concatenate((train,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)),axis=0)
                 if int(tmp[2].strip()) == 0:
-                        numpy.append(res_train,[1,0])
+			res_train = numpy.concatenate((res_train,numpy.array([[1,0]])))
                 else:
-                        numpy.append(res_train,[0,1])
-                #print "NOT FOUND"
+                        res_train = numpy.concatenate((res_train,numpy.array([[0,1]])))
+                i += 1
+	print res_train	
 	return train,res_train
 
 def test_dbn(pretrain_lr=0.1, pretraining_epochs=1000, k=1, \
              finetune_lr=0.1, finetune_epochs=200):
 
-    x,y = gene_data()
+    #x,y = gene_data()
 
-    """ 
-    x = numpy.array([[1,1,1,0,0,0],
-                     [1,0,1,0,0,0],
-                     [1,1,1,0,0,0],
-                     [0,0,1,1,1,0],
-                     [0,0,1,1,0,0],
-                     [0,0,1,1,1,0]])
+    
+    x = numpy.array([[0,0,0,0,0,1,1,0,0],
+                     [1,1,1,1,1,1,1,1,1],
+                     [0,0,1,0,0,0,0,0,0],
+                     [0,0,1,1,1,1,1,0,0],
+                     [1,1,1,0,0,0,0,0,0]])
     y = numpy.array([[1, 0],
                      [1, 0],
-                     [1, 0],
                      [0, 1],
                      [0, 1],
-                     [0, 1]])
+                     [1, 0]])
  
-    """
+    
 
     rng = numpy.random.RandomState(123)
- 
+
     # construct DBN
-    dbn = DBN(input=x, label=y, n_ins=6, hidden_layer_sizes=[3, 3], n_outs=2, numpy_rng=rng)
+    dbn = DBN(input=x, label=y, n_ins=9, hidden_layer_sizes=[6, 6], n_outs=2, numpy_rng=rng)
+
  
     # pre-training (TrainUnsupervisedDBN)
     dbn.pretrain(lr=pretrain_lr, k=1, epochs=pretraining_epochs)
@@ -437,7 +467,11 @@ def test_dbn(pretrain_lr=0.1, pretraining_epochs=1000, k=1, \
  
  
     # test
-    x = numpy.array([1, 1, 0, 0, 0, 0])
+    # 1,0,1
+    #x = numpy.array([0, 0, 0, 0, 0, 0, 0, 1, 0])
+    x = numpy.array([1, 1, 0, 0, 0, 0, 0, 0, 0])
+    #x = numpy.array([0, 0, 1, 0, 1, 0, 0, 1, 1])
+    
     print dbn.predict(x)
  
  

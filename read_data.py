@@ -73,21 +73,16 @@ if __name__ == "__main__":
 
 	combi = list(itertools.combinations(range(cols), 2))
 	train = numpy.zeros(len(lines))
-	print len(lines)
 	res_train = numpy.zeros(2)
-	print res_train
+	
 	i = 0
 	for y in lins:
 		print y
 		tmp =  y.split("\t")
 		#print chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)
 		numpy.column_stack((train,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
-		#train[i] = chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)
 		if int(tmp[2].strip()) == 0:
 			numpy.vstack((res_train,[1,0]))
-			print "0"
 		else:
 			numpy.vstack((res_train,[0,1]))
 		i += 1
-		print res_train
-		#print "NOT FOUND"
