@@ -354,7 +354,7 @@ class LogisticRegression(object):
  
 
 def chip_data(num):
-        f = open("Network1_expression_data.tsv")
+        f = open("Nw1_Ex_10_S.csv")
         lines = f.readlines()
         arr = numpy.array([])
         for x in lines:
@@ -364,27 +364,32 @@ def chip_data(num):
         return arr
 
 def chip_data_dif(a,b):
-        threshold = 0.3
+        threshold = 0.5
 
-        f = open("Network1_expression_data.tsv")
-        lines = f.readlines()
+        f = open("Nw1_Ex_10_S.csv")
+        tmp_f = f.read()
+	lines =	tmp_f.split("\r")
         f.close()
 
         arr = []
         i = 0
-        res = numpy.zeros(len(lines))
+        #res = numpy.zeros(len(lines))
+        res = numpy.array([])
         for x in lines:
-                if i != 0:
-                        tmp = x.split("\t")
+		if int(x.find("G")) == int(-1):
+                        tmp = x.split(",")
                         tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
-                        if float(threshold) > tmp_d:
-                                #arr.append(1)
-                                res[i-1] = 1
+                        if float(threshold) > float(tmp_d):
+				res = numpy.append(res,1)
+                                #res[i] = 1
+				#numpy.hstack((res,1))
                         else:
-                                #arr.append(0)
-                                res[i-1] = 0
+                                #res[i] = 0
+				res = numpy.append(res,0)
+				#numpy.hstack((res,1))
                 i += 1
-        #return arr
+		
+	print "(^-^)b",res
         return res
 
 def limited_for_train(a,b):
@@ -397,7 +402,7 @@ def gene_data():
 	import itertools
 
    	#convert()
-        f = open("Nw1_Ex_10.csv")
+        f = open("Nw1_Ex_10_S.csv")
         tmp_f = f.read()
 	lines = tmp_f.split("\r")
         f.close()
@@ -413,33 +418,28 @@ def gene_data():
         combi = list(itertools.combinations(range(cols), 2))
         
 	
-	train = numpy.zeros(len(lines))
-        res_train = numpy.array([[0, 0]])
+	train = numpy.array(numpy.zeros(cols))
+        res_train = numpy.array([[0, 1]])
 	
 	#res_train = numpy.concatenate((res_train,numpy.array([[1,0]])),axis=0)
-	print res_train
+	print train
 	#res_train = numpy.concatenate((res_train,numpy.array([[1,0]])))
          
 	i = 0
 	for y in lins:
                 tmp =  y.split(",")
-                #print chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)
                 #numpy.column_stack((train,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
-                train = numpy.concatenate((train,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)),axis=0)
+                train = numpy.vstack((train,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
                 if int(tmp[2].strip()) == 0:
-			res_train = numpy.concatenate((res_train,numpy.array([[1,0]])))
+			#res_train = numpy.concatenate((res_train,numpy.array([[1,0]])))
+			res_train = numpy.vstack((res_train,numpy.array([1,0])))
                 else:
-                        res_train = numpy.concatenate((res_train,numpy.array([[0,1]])))
+                        res_train = numpy.vstack((res_train,numpy.array([0,1])))
                 i += 1
 	print res_train	
 	return train,res_train
 
-def test_dbn(pretrain_lr=0.1, pretraining_epochs=1000, k=1, \
-             finetune_lr=0.1, finetune_epochs=200):
-
-    #x,y = gene_data()
-
-    
+def easy_test():
     x = numpy.array([[0,0,0,0,0,1,1,0,0],
                      [1,1,1,1,1,1,1,1,1],
                      [0,0,1,0,0,0,0,0,0],
@@ -450,13 +450,17 @@ def test_dbn(pretrain_lr=0.1, pretraining_epochs=1000, k=1, \
                      [0, 1],
                      [0, 1],
                      [1, 0]])
- 
-    
 
+def test_dbn(pretrain_lr=0.1, pretraining_epochs=1000, k=1, \
+             finetune_lr=0.1, finetune_epochs=200):
+
+    x,y = gene_data()
+
+    num_expression = len(x[0])
     rng = numpy.random.RandomState(123)
 
     # construct DBN
-    dbn = DBN(input=x, label=y, n_ins=9, hidden_layer_sizes=[6, 6], n_outs=2, numpy_rng=rng)
+    dbn = DBN(input=x, label=y, n_ins=num_expression, hidden_layer_sizes=[6, 6], n_outs=2, numpy_rng=rng)
 
  
     # pre-training (TrainUnsupervisedDBN)

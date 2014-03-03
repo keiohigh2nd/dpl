@@ -6,4 +6,5 @@ Theano/
 *.jpg
 *.gz
 *.tsv
+*.csv
 *.cpp
