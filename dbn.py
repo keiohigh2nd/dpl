@@ -401,28 +401,36 @@ def limited_for_train(a,b):
 def gene_data():
 	import itertools
 
-   	#convert()
-        f = open("Nw1_Ex_10_S.csv")
+   	"""
+	Please Be careful for the file name
+	1: Number of ROW of Expression Data
+	2:
+	"""
+        
+	f = open("Nw1_Ex_10_S.csv")
         tmp_f = f.read()
 	lines = tmp_f.split("\r")
         f.close()
         tm = lines[0].split(",")
-        cols = len(tm)
-        print "Number of Genes = %d"%cols
 
-        #You cannot change this part because of something excel error
+	#File Information 
+        cols = len(lines)-1
+        print "Number of Row expression Genes = %d"%cols
+	num_genes = len(tm)
+	print "Number of column Genes = %d"%num_genes
+	
+        #THIS IS CSV. \R and , are keys.
         f1 = open("Nw1_G_10.csv")
 	tmp_f1 = f1.read()
         lins = tmp_f1.split("\r")
         f1.close()
         combi = list(itertools.combinations(range(cols), 2))
         
-	
+	#This means RESIZE
 	train = numpy.array(numpy.zeros(cols))
-        res_train = numpy.array([[0, 1]])
+        res_train = numpy.array([[0, 10]])
 	
 	#res_train = numpy.concatenate((res_train,numpy.array([[1,0]])),axis=0)
-	print train
 	#res_train = numpy.concatenate((res_train,numpy.array([[1,0]])))
          
 	i = 0
@@ -436,7 +444,14 @@ def gene_data():
                 else:
                         res_train = numpy.vstack((res_train,numpy.array([0,1])))
                 i += 1
-	print res_train	
+
+	#Delete first input data
+	res_train = numpy.delete(res_train,0,0)
+	train = numpy.delete(train,0,0)
+	
+	#Check number of expression data and gold standard is the same number.
+	print len(res_train), len(train)
+	
 	return train,res_train
 
 def easy_test():
