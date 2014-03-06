@@ -363,10 +363,10 @@ def chip_data(num):
         print arr
         return arr
 
-def chip_data_dif(a,b):
+def chip_data_dif_test(a,b):
         threshold = 0.5
 
-        f = open("Nw1_Ex_10_S.csv")
+        f = open("Network3_expression_data.csv")
         tmp_f = f.read()
 	lines =	tmp_f.split("\r")
         f.close()
@@ -392,6 +392,35 @@ def chip_data_dif(a,b):
 	print "(^-^)b",res
         return res
 
+def chip_data_dif_train(a,b):
+        threshold = 0.5
+
+        f = open("Network1_expression_data.csv")
+        tmp_f = f.read()
+        lines = tmp_f.split("\r")
+        f.close()
+
+        arr = []
+        i = 0
+        #res = numpy.zeros(len(lines))
+        res = numpy.array([])
+        for x in lines:
+                if int(x.find("G")) == int(-1):
+                        tmp = x.split(",")
+                        tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
+                        if float(threshold) > float(tmp_d):
+                                res = numpy.append(res,1)
+                                #res[i] = 1
+                                #numpy.hstack((res,1))
+                        else:
+                                #res[i] = 0
+                                res = numpy.append(res,0)
+                                #numpy.hstack((res,1))
+                i += 1
+
+        print "(^-^)b",res
+        return res
+
 def limited_for_train(a,b):
 	if a < 30 and b < 30:
 		return 1
@@ -407,7 +436,7 @@ def gene_data():
 	2:
 	"""
         
-	f = open("Nw1_Ex_10_S.csv")
+	f = open("Network1_expression_data.csv")
         tmp_f = f.read()
 	lines = tmp_f.split("\r")
         f.close()
@@ -420,11 +449,11 @@ def gene_data():
 	print "Number of column Genes = %d"%num_genes
 	
         #THIS IS CSV. \R and , are keys.
-        f1 = open("Nw1_G_10.csv")
+        f1 = open("Nw1_G.csv")
 	tmp_f1 = f1.read()
         lins = tmp_f1.split("\r")
         f1.close()
-        combi = list(itertools.combinations(range(cols), 2))
+        combi = list(itertools.combinations(range(num_genes), 2))
         
 	#This means RESIZE
 	train = numpy.array(numpy.zeros(cols))
@@ -437,7 +466,8 @@ def gene_data():
 	for y in lins:
                 tmp =  y.split(",")
                 #numpy.column_stack((train,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
-                train = numpy.vstack((train,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
+		print y
+                train = numpy.vstack((train,chip_data_dif_train(int(tmp[0])-1,int(tmp[1])-1)))
                 if int(tmp[2].strip()) == 0:
 			#res_train = numpy.concatenate((res_train,numpy.array([[1,0]])))
 			res_train = numpy.vstack((res_train,numpy.array([1,0])))
@@ -470,7 +500,7 @@ def gene_test():
 	import itertools
 
 	#Expression_data
-	f = open("Nw1_Ex_10_S.csv")
+	f = open("Network3_expression_data.csv")
         tmp_f = f.read()
         lines = tmp_f.split("\r")
         f.close()
@@ -483,7 +513,7 @@ def gene_test():
         print "Number of column Genes = %d"%num_genes
 
         #GOLD_Standard_Data_THIS IS CSV. \R and , are keys.
-        f1 = open("Nw1_G_10.csv")
+        f1 = open("Nw3_G.csv")
         tmp_f1 = f1.read()
         lins = tmp_f1.split("\r")
         f1.close()
@@ -500,7 +530,7 @@ def gene_test():
         for y in lins:
 		tmp =  y.split(",")
                 #numpy.column_stack((test,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
-                test = numpy.vstack((test,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
+                test = numpy.vstack((test,chip_data_test(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
                 if int(tmp[2].strip()) == 0:
                         #res_test = numpy.concatenate((res_test,numpy.array([[1,0]])))
                         res_test = numpy.vstack((res_test,numpy.array([1,0])))
