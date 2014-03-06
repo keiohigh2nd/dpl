@@ -38,26 +38,30 @@ def chip_data_dif(a,b):
 	return res
 
 def convert():
-	f = open("DREAM5_NetworkInference_GoldStandard_Network1.txt")
-	lines = f.readlines()
+	#tranform GXX to XX
+	f = open("DREAM5_NetworkInference_GoldStandard_Network3.csv")
+	tmp_f = f.read()
+	lines = tmp_f.split("\r")
 	f.close()
 
-	f1 = open("Goldstandard_a.txt","w")
+	f1 = open("Nw3_G.csv","w")
 	for x in lines:
-		tmp = x.split("\t")
+		tmp = x.split(",")
 		f1.write(tmp[0].strip("G"))
-		f1.write("\t")
+		f1.write(",")
 		f1.write(tmp[1].strip("G"))
-		f1.write("\t")
+		f1.write(",")
 		f1.write(tmp[2].strip("\n"))
-		f1.write("\n")
+		f1.write("\r")
 	f1.close()
 		
 
 if __name__ == "__main__":
 	import itertools
 	
-	#convert()
+	convert()
+
+	"""
 	f = open("Network1_expression_data.tsv")
 	lines = f.readlines()
 	f.close()
@@ -86,3 +90,4 @@ if __name__ == "__main__":
 		else:
 			numpy.vstack((res_train,[0,1]))
 		i += 1
+	"""

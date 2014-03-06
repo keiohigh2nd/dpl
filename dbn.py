@@ -466,6 +466,93 @@ def easy_test():
                      [0, 1],
                      [1, 0]])
 
+def gene_test():
+	import itertools
+
+	#Expression_data
+	f = open("Nw1_Ex_10_S.csv")
+        tmp_f = f.read()
+        lines = tmp_f.split("\r")
+        f.close()
+        tm = lines[0].split(",")
+
+        #File Information 
+        cols = len(lines)-1
+        print "Number of Row expression Genes = %d"%cols
+        num_genes = len(tm)
+        print "Number of column Genes = %d"%num_genes
+
+        #GOLD_Standard_Data_THIS IS CSV. \R and , are keys.
+        f1 = open("Nw1_G_10.csv")
+        tmp_f1 = f1.read()
+        lins = tmp_f1.split("\r")
+        f1.close()
+        combi = list(itertools.combinations(range(cols), 2))
+
+        #This means RESIZE
+        test = numpy.array(numpy.zeros(cols))
+        res_test = numpy.array([[0, 10]])
+
+        #res_test = numpy.concatenate((res_test,numpy.array([[1,0]])),axis=0)
+        #res_test = numpy.concatenate((res_test,numpy.array([[1,0]])))
+
+        i = 0
+        for y in lins:
+		tmp =  y.split(",")
+                #numpy.column_stack((test,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
+                test = numpy.vstack((test,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
+                if int(tmp[2].strip()) == 0:
+                        #res_test = numpy.concatenate((res_test,numpy.array([[1,0]])))
+                        res_test = numpy.vstack((res_test,numpy.array([1,0])))
+                else:
+                        res_test = numpy.vstack((res_test,numpy.array([0,1])))
+                i += 1
+
+        #Delete first input data
+        res_test = numpy.delete(res_test,0,0)
+        test = numpy.delete(test,0,0)
+
+        #Check number of expression data and gold standard is the same number.
+        print len(res_test), len(test)
+
+        return test,res_test
+
+def calc_accuracy(res,res_test):
+	if len(res) != len(res_test):
+		print "Error Size is different"
+		return 0
+	
+	i = 0
+	tp = 0
+	fp = 0
+	tn = 0
+	fn = 0
+	for x in res:
+		if change_binary(x) == change_binary(res_test[i]):
+			if change_binary(x) == 0:
+				fn += 1
+			else:
+				tp += 1
+		else:
+			if change_binary(x) == 0:
+				tn += 1
+			else:
+				fp += 1
+
+	print "True Positive = %d"%tp
+	print "True Negative = %d"%tn
+	print "False Positive = %d"%fp
+	print "False Negative = %d"%fn
+	
+			
+			
+def change_binary(x):
+	if x[0] >= x[1]:
+		return 0
+	else:
+		return 1
+		
+
 def test_dbn(pretrain_lr=0.1, pretraining_epochs=1000, k=1, \
              finetune_lr=0.1, finetune_epochs=200):
 
@@ -486,12 +573,15 @@ def test_dbn(pretrain_lr=0.1, pretraining_epochs=1000, k=1, \
  
  
     # test
-    # 1,0,1
-    #x = numpy.array([0, 0, 0, 0, 0, 0, 0, 1, 0])
-    x = numpy.array([1, 1, 0, 0, 0, 0, 0, 0, 0])
     #x = numpy.array([0, 0, 1, 0, 1, 0, 0, 1, 1])
-    
-    print dbn.predict(x)
+    test, res_test = gene_test()
+
+    res = []
+    for x in test:
+    	res.append(dbn.predict(x))
+
+    calc_accuracy(res,res_test)
+
  
  
 if __name__ == "__main__":
