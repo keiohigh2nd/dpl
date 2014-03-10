@@ -461,6 +461,8 @@ def gene_data():
          
 	i = 0
 	for y in lins:
+		if i > 6000:
+			break
                 tmp =  y.split(",")
                 #numpy.column_stack((train,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
 		try:
@@ -474,6 +476,7 @@ def gene_data():
                 	i += 1
 		except:
 			print "error----",y
+                	i += 1
 
 	#Delete first input data
 	res_train = numpy.delete(res_train,0,0)
@@ -528,6 +531,8 @@ def gene_test():
 
         i = 0
         for y in lins:
+		if i > 6000:
+			break
 		tmp =  y.split(",")
                 #numpy.column_stack((test,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
 		try:
@@ -542,6 +547,7 @@ def gene_test():
 
 		except:
 			print "error___",y
+                	i += 1
 
         #Delete first input data
         res_test = numpy.delete(res_test,0,0)

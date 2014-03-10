@@ -1,0 +1,10 @@
+Number of Row expression Genes = 805
+Number of column Genes = 1643
+Traceback (most recent call last):
+  File "dbn.py", line 633, in <module>
+    test_dbn()
+  File "dbn.py", line 601, in test_dbn
+    x,y = gene_data()
+  File "dbn.py", line 466, in gene_data
+    if tmp[0].strip("G").isdigit() == True & tmp[1].strip("G").isdigit() == True:
+IndexError: list index out of range
