@@ -814,15 +814,14 @@ def test_dbn(pretrain_lr, pretraining_epochs, k, finetune_lr, finetune_epochs, n
     return res_calc
  
 if __name__ == "__main__":
-    res_tmp = 0
-    i = 1
-    j = 100
+    import random
 
-    while res_tmp <= 0.7: 
+    res_tmp = 0
+    while res_tmp <= 0.7:
+	i = random.randint(4,200)
+    	j = random.randint(200,100000) 
+	print i
+	print j
     	tmp = test_dbn(0.1,1000,1,0.1,200,i,j)
 	if res_tmp <= tmp:
 		res_tmp = tmp
-	i += 5
-	j += 10
-	print i
-	print j

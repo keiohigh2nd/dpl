@@ -674,7 +674,7 @@ def test_dbn(pretrain_lr=0.1, pretraining_epochs=1000, k=1, \
     rng = numpy.random.RandomState(123)
 
     # construct DBN
-    dbn = DBN(input=x, label=y, n_ins=num_expression, hidden_layer_sizes=[20, 9000], n_outs=2, numpy_rng=rng)
+    dbn = DBN(input=x, label=y, n_ins=num_expression, hidden_layer_sizes=[5, 10000], n_outs=2, numpy_rng=rng)
 
  
     # pre-training (TrainUnsupervisedDBN)
