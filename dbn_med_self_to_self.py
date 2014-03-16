@@ -362,10 +362,44 @@ def chip_data(num):
                 arr.append(tmp[num])
         return arr
 
-def chip_data_dif_test(a,b):
-        threshold = 0.3
 
-        f = open("Network3_expression_data.csv")
+def get_average_train(a,b):
+        f = open("Network1_expression_data.csv")
+        tmp_f = f.read()
+        lines = tmp_f.split("\r")
+        f.close()
+
+        ave = 0
+        for x in lines:
+                if int(x.find("G")) == int(-1):
+                        tmp = x.split(",")
+                        tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
+                        ave += float(tmp_d)
+
+        return ave/len(lines)
+
+def get_average_test(a,b):
+        f = open("Network1_expression_data.csv")
+        tmp_f = f.read()
+        lines = tmp_f.split("\r")
+        f.close()
+
+        ave = 0
+        for x in lines:
+                if int(x.find("G")) == int(-1):
+                        tmp = x.split(",")
+                        tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
+                        ave += float(tmp_d)
+
+        return ave/len(lines)
+
+
+
+def chip_data_dif_test(a,b):
+        threshold = 0.1
+        #threshold = get_average_test(a,b)
+
+        f = open("Network1_expression_data.csv")
         tmp_f = f.read()
 	lines =	tmp_f.split("\r")
         f.close()
@@ -378,6 +412,8 @@ def chip_data_dif_test(a,b):
 		if int(x.find("G")) == int(-1):
                         tmp = x.split(",")
                         tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
+                        res = numpy.append(res,tmp_d)
+			"""
                         if float(threshold) > float(tmp_d):
 				res = numpy.append(res,1)
                                 #res[i] = 1
@@ -386,12 +422,14 @@ def chip_data_dif_test(a,b):
                                 #res[i] = 0
 				res = numpy.append(res,0)
 				#numpy.hstack((res,1))
+			"""
                 i += 1
 		
         return res
 
 def chip_data_dif_train(a,b):
-        threshold = 0.3
+        #threshold = 0.1
+        #threshold = get_average_train(a,b)
 
         f = open("Network1_expression_data.csv")
         tmp_f = f.read()
@@ -406,6 +444,8 @@ def chip_data_dif_train(a,b):
                 if int(x.find("G")) == int(-1):
                         tmp = x.split(",")
                         tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
+                        res = numpy.append(res,tmp_d)
+			"""
                         if float(threshold) > float(tmp_d):
                                 res = numpy.append(res,1)
                                 #res[i] = 1
@@ -414,6 +454,7 @@ def chip_data_dif_train(a,b):
                                 #res[i] = 0
                                 res = numpy.append(res,0)
                                 #numpy.hstack((res,1))
+			"""
                 i += 1
 
         return res
@@ -446,7 +487,7 @@ def gene_data():
 	print "Number of column Genes = %d"%num_genes
 	
         #THIS IS CSV. \R and , are keys.
-        f1 = open("Nw1_G.csv")
+        f1 = open("Nw1_G_200.csv")
 	tmp_f1 = f1.read()
         lins = tmp_f1.split("\r")
         f1.close()
@@ -461,8 +502,6 @@ def gene_data():
          
 	i = 0
 	for y in lins:
-		if i > 6000:
-			break
                 tmp =  y.split(",")
                 #numpy.column_stack((train,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
 		try:
@@ -498,12 +537,26 @@ def easy_test():
                      [0, 1],
                      [0, 1],
                      [1, 0]])
+    return x,y
+
+def easy_test_1():
+    x = numpy.array([[0.6,0.5,0.5,0,0,1,1.2,0.2,0],
+                     [1,1,1.2,1.2,1,1.2,1,1,1.2],
+                     [0,0.2,1.5,0,0.1,0.3,0,0,0],
+                     [0,0,1,1,1,1,1,0,0],
+                     [1.3,1.3,1.3,0.3,0.3,0,0,0,0.3]])
+    y = numpy.array([[1, 0],
+                     [1, 0],
+                     [0, 1],
+                     [0, 1],
+                     [1, 0]])
+    return x,y
 
 def gene_test():
 	import itertools
 
 	#Expression_data
-	f = open("Network3_expression_data.csv")
+	f = open("Network1_expression_data.csv")
         tmp_f = f.read()
         lines = tmp_f.split("\r")
         f.close()
@@ -516,7 +569,7 @@ def gene_test():
         print "Number of column Genes = %d"%num_genes
 
         #GOLD_Standard_Data_THIS IS CSV. \R and , are keys.
-        f1 = open("Nw3_G.csv")
+        f1 = open("Nw1_G_200_1.csv")
         tmp_f1 = f1.read()
         lins = tmp_f1.split("\r")
         f1.close()
@@ -531,8 +584,6 @@ def gene_test():
 
         i = 0
         for y in lins:
-		if i > 6000:
-			break
 		tmp =  y.split(",")
                 #numpy.column_stack((test,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
 		try:
@@ -569,6 +620,7 @@ def calc_accuracy(res,res_test):
 	tn = 0
 	fn = 0
 	for x in res:
+		print x
 		if int(change_binary(x)) == int(change_binary(res_test[i])):
 			if int(change_binary(x)) == 0:
 				fn += 1
@@ -604,7 +656,7 @@ def calc_accuracy(res,res_test):
 			
 			
 def change_binary(x):
-	if x[0] >= x[1]:
+	if float(x[0]) >= float(x[1]):
 		return 0
 	else:
 		return 1
@@ -615,13 +667,14 @@ def test_dbn(pretrain_lr=0.1, pretraining_epochs=1000, k=1, \
     import time
     start = time.clock()
 
+    #x,y = easy_test_1()
     x,y = gene_data()
 
     num_expression = len(x[0])
     rng = numpy.random.RandomState(123)
 
     # construct DBN
-    dbn = DBN(input=x, label=y, n_ins=num_expression, hidden_layer_sizes=[5, 20], n_outs=2, numpy_rng=rng)
+    dbn = DBN(input=x, label=y, n_ins=num_expression, hidden_layer_sizes=[20, 9000], n_outs=2, numpy_rng=rng)
 
  
     # pre-training (TrainUnsupervisedDBN)
@@ -632,9 +685,10 @@ def test_dbn(pretrain_lr=0.1, pretraining_epochs=1000, k=1, \
  
  
     # test
-    #x = numpy.array([0, 0, 1, 0, 1, 0, 0, 1, 1])
+    #x = numpy.array([1.3,1.3,1.3,0.3,0.3,0,0,0,0.3])
     test, res_test = gene_test()
 
+   
     res = []
     for x in test:
     	res.append(dbn.predict(x))

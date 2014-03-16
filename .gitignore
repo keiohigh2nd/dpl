@@ -8,3 +8,6 @@ Theano/
 *.tsv
 *.csv
 *.cpp
+*.out
+*pyc
+

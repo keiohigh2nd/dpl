@@ -362,8 +362,42 @@ def chip_data(num):
                 arr.append(tmp[num])
         return arr
 
+
+def get_average_train(a,b):
+        f = open("Network1_expression_data.csv")
+        tmp_f = f.read()
+        lines = tmp_f.split("\r")
+        f.close()
+
+        ave = 0
+        for x in lines:
+                if int(x.find("G")) == int(-1):
+                        tmp = x.split(",")
+                        tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
+                        ave += float(tmp_d)
+
+        return ave/len(lines)
+
+def get_average_test(a,b):
+        f = open("Network3_expression_data.csv")
+        tmp_f = f.read()
+        lines = tmp_f.split("\r")
+        f.close()
+
+        ave = 0
+        for x in lines:
+                if int(x.find("G")) == int(-1):
+                        tmp = x.split(",")
+                        tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
+                        ave += float(tmp_d)
+
+        return ave/len(lines)
+
+
+
 def chip_data_dif_test(a,b):
-        threshold = 0.3
+        #threshold = 0.08
+        #threshold = get_average_test(a,b)
 
         f = open("Network3_expression_data.csv")
         tmp_f = f.read()
@@ -378,20 +412,14 @@ def chip_data_dif_test(a,b):
 		if int(x.find("G")) == int(-1):
                         tmp = x.split(",")
                         tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
-                        if float(threshold) > float(tmp_d):
-				res = numpy.append(res,1)
-                                #res[i] = 1
-				#numpy.hstack((res,1))
-                        else:
-                                #res[i] = 0
-				res = numpy.append(res,0)
-				#numpy.hstack((res,1))
+			res = numpy.append(res,tmp_d)
                 i += 1
 		
         return res
 
 def chip_data_dif_train(a,b):
-        threshold = 0.3
+        #threshold = 0.08
+        #threshold = get_average_train(a,b)
 
         f = open("Network1_expression_data.csv")
         tmp_f = f.read()
@@ -406,14 +434,7 @@ def chip_data_dif_train(a,b):
                 if int(x.find("G")) == int(-1):
                         tmp = x.split(",")
                         tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
-                        if float(threshold) > float(tmp_d):
-                                res = numpy.append(res,1)
-                                #res[i] = 1
-                                #numpy.hstack((res,1))
-                        else:
-                                #res[i] = 0
-                                res = numpy.append(res,0)
-                                #numpy.hstack((res,1))
+			res = numpy.append(res,tmp_d)
                 i += 1
 
         return res
@@ -445,8 +466,8 @@ def gene_data():
 	num_genes = len(tm)
 	print "Number of column Genes = %d"%num_genes
 	
-        #THIS IS CSV. \R and , are keys.
-        f1 = open("Nw1_G.csv")
+        #THIS IS CSV. \R and , are keys.Don't forget to run read.py convert()
+        f1 = open("Nw1_G_200.csv")
 	tmp_f1 = f1.read()
         lins = tmp_f1.split("\r")
         f1.close()
@@ -461,8 +482,6 @@ def gene_data():
          
 	i = 0
 	for y in lins:
-		if i > 6000:
-			break
                 tmp =  y.split(",")
                 #numpy.column_stack((train,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
 		try:
@@ -515,8 +534,8 @@ def gene_test():
         num_genes = len(tm)
         print "Number of column Genes = %d"%num_genes
 
-        #GOLD_Standard_Data_THIS IS CSV. \R and , are keys.
-        f1 = open("Nw3_G.csv")
+        #GOLD_Standard_Data_THIS IS CSV. \R and , are keys.Don't forget to run read.py convert()
+        f1 = open("Nw3_G_200.csv")
         tmp_f1 = f1.read()
         lins = tmp_f1.split("\r")
         f1.close()
@@ -531,8 +550,6 @@ def gene_test():
 
         i = 0
         for y in lins:
-		if i > 6000:
-			break
 		tmp =  y.split(",")
                 #numpy.column_stack((test,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
 		try:
@@ -569,6 +586,7 @@ def calc_accuracy(res,res_test):
 	tn = 0
 	fn = 0
 	for x in res:
+		print x
 		if int(change_binary(x)) == int(change_binary(res_test[i])):
 			if int(change_binary(x)) == 0:
 				fn += 1
@@ -604,13 +622,13 @@ def calc_accuracy(res,res_test):
 			
 			
 def change_binary(x):
-	if x[0] >= x[1]:
+	if float(x[0]) >= float(x[1]):
 		return 0
 	else:
 		return 1
 		
 
-def test_dbn(pretrain_lr=0.1, pretraining_epochs=1000, k=1, \
+def test_dbn(pretrain_lr=0.08, pretraining_epochs=1000, k=1, \
              finetune_lr=0.1, finetune_epochs=200):
     import time
     start = time.clock()
@@ -621,7 +639,7 @@ def test_dbn(pretrain_lr=0.1, pretraining_epochs=1000, k=1, \
     rng = numpy.random.RandomState(123)
 
     # construct DBN
-    dbn = DBN(input=x, label=y, n_ins=num_expression, hidden_layer_sizes=[5, 20], n_outs=2, numpy_rng=rng)
+    dbn = DBN(input=x, label=y, n_ins=num_expression, hidden_layer_sizes=[30, 700], n_outs=2, numpy_rng=rng)
 
  
     # pre-training (TrainUnsupervisedDBN)

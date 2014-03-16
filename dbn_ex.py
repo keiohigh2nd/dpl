@@ -363,7 +363,7 @@ def chip_data(num):
         return arr
 
 def chip_data_dif_test(a,b):
-        threshold = 0.3
+        threshold = 0.5
 
         f = open("Network3_expression_data.csv")
         tmp_f = f.read()
@@ -391,7 +391,7 @@ def chip_data_dif_test(a,b):
         return res
 
 def chip_data_dif_train(a,b):
-        threshold = 0.3
+        threshold = 0.5
 
         f = open("Network1_expression_data.csv")
         tmp_f = f.read()
@@ -461,8 +461,6 @@ def gene_data():
          
 	i = 0
 	for y in lins:
-		if i > 6000:
-			break
                 tmp =  y.split(",")
                 #numpy.column_stack((train,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
 		try:
@@ -476,7 +474,6 @@ def gene_data():
                 	i += 1
 		except:
 			print "error----",y
-                	i += 1
 
 	#Delete first input data
 	res_train = numpy.delete(res_train,0,0)
@@ -487,17 +484,31 @@ def gene_data():
 	
 	return train,res_train
 
-def easy_test():
+def easy_train():
     x = numpy.array([[0,0,0,0,0,1,1,0,0],
-                     [1,1,1,1,1,1,1,1,1],
+                     [0,0,0,0,0,1,1,0,1],
                      [0,0,1,0,0,0,0,0,0],
-                     [0,0,1,1,1,1,1,0,0],
-                     [1,1,1,0,0,0,0,0,0]])
+                     [0,1,1,0,0,0,0,0,0],
+                     [0,0,0,0,1,1,1,0,0]])
     y = numpy.array([[1, 0],
                      [1, 0],
                      [0, 1],
                      [0, 1],
                      [1, 0]])
+    return x,y
+
+def easy_test():
+    x = numpy.array([[0,0,0,0,0,1,1,1,0],
+                     [0,0,0,0,1,1,1,1,1],
+                     [1,0,1,0,1,0,0,0,0],
+                     [1,0,1,1,0,0,0,0,0],
+                     [0,0,0,0,0,0,1,0,1]])
+    y = numpy.array([[1, 0],
+                     [1, 0],
+                     [0, 1],
+                     [0, 1],
+                     [1, 0]])
+    return x,y
 
 def gene_test():
 	import itertools
@@ -531,8 +542,6 @@ def gene_test():
 
         i = 0
         for y in lins:
-		if i > 6000:
-			break
 		tmp =  y.split(",")
                 #numpy.column_stack((test,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
 		try:
@@ -547,7 +556,6 @@ def gene_test():
 
 		except:
 			print "error___",y
-                	i += 1
 
         #Delete first input data
         res_test = numpy.delete(res_test,0,0)
@@ -596,10 +604,6 @@ def calc_accuracy(res,res_test):
 	print "True Negative = %d"%tn
 	print "False Positive = %d"%fp
 	print "False Negative = %d"%fn
-
-	all = tp + tn + fp + fn
-
-	return float(tp+fn)/all
 	
 			
 			
@@ -615,13 +619,14 @@ def test_dbn(pretrain_lr=0.1, pretraining_epochs=1000, k=1, \
     import time
     start = time.clock()
 
-    x,y = gene_data()
+    #x,y = gene_data()
+    x,y = easy_train()
 
     num_expression = len(x[0])
     rng = numpy.random.RandomState(123)
 
     # construct DBN
-    dbn = DBN(input=x, label=y, n_ins=num_expression, hidden_layer_sizes=[5, 20], n_outs=2, numpy_rng=rng)
+    dbn = DBN(input=x, label=y, n_ins=num_expression, hidden_layer_sizes=[20, 120], n_outs=2, numpy_rng=rng)
 
  
     # pre-training (TrainUnsupervisedDBN)
@@ -633,11 +638,14 @@ def test_dbn(pretrain_lr=0.1, pretraining_epochs=1000, k=1, \
  
     # test
     #x = numpy.array([0, 0, 1, 0, 1, 0, 0, 1, 1])
-    test, res_test = gene_test()
+    #test, res_test = gene_test()
+    test, res_test = easy_test()
 
     res = []
     for x in test:
-    	res.append(dbn.predict(x))
+	tmp = dbn.predict(x)
+	print tmp
+    	res.append(tmp)
 
     calc_accuracy(res,res_test)
 
