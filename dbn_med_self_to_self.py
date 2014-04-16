@@ -1,20 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
  
-'''
- Deep Belief Nets (DBN)
- 
- References :
-   - Y. Bengio, P. Lamblin, D. Popovici, H. Larochelle: Greedy Layer-Wise
-   Training of Deep Networks, Advances in Neural Information Processing
-   Systems 19, 2007
- 
- 
-   - DeepLearningTutorials
-   https://github.com/lisa-lab/DeepLearningTutorials
- 
- 
-'''
  
 import sys
 import numpy
@@ -650,8 +636,8 @@ def calc_accuracy(res,res_test):
 	print "False Negative = %d"%fn
 
 	all = tp + tn + fp + fn
-
-	return float(tp+fn)/all
+	res_d = float(tp+fn)/all
+	return res_d
 	
 			
 			
@@ -662,8 +648,7 @@ def change_binary(x):
 		return 1
 		
 
-def test_dbn(pretrain_lr=0.1, pretraining_epochs=1000, k=1, \
-             finetune_lr=0.1, finetune_epochs=200):
+def test_dbn(pretrain_lr, pretraining_epochs, k, finetune_lr, finetune_epochs, num_lays, num_units):
     import time
     start = time.clock()
 
@@ -674,7 +659,7 @@ def test_dbn(pretrain_lr=0.1, pretraining_epochs=1000, k=1, \
     rng = numpy.random.RandomState(123)
 
     # construct DBN
-    dbn = DBN(input=x, label=y, n_ins=num_expression, hidden_layer_sizes=[5, 10000], n_outs=2, numpy_rng=rng)
+    dbn = DBN(input=x, label=y, n_ins=num_expression, hidden_layer_sizes=[num_lays, num_units], n_outs=2, numpy_rng=rng)
 
  
     # pre-training (TrainUnsupervisedDBN)
@@ -693,12 +678,32 @@ def test_dbn(pretrain_lr=0.1, pretraining_epochs=1000, k=1, \
     for x in test:
     	res.append(dbn.predict(x))
 
-    calc_accuracy(res,res_test)
-
     end = time.clock()
     tom = end-start
     print "Takes",tom
 
+    return calc_accuracy(res,res_test)
+
  
 if __name__ == "__main__":
-    test_dbn()
+    import random
+
+    f = open("run_res.txt","w")
+
+    res_tmp = 0
+    while res_tmp <= 0.7:
+        i = 15
+        j = random.randint(2000,2200) 
+        print i
+        print j
+        tmp = test_dbn(0.0001,1000,1,0.0001,200,i,j)
+        f.write(str(i))
+        f.write("\t")
+        f.write(str(j))
+        f.write("\t")
+        f.write(str(tmp))
+        f.write("\n")
+	if res_tmp < tmp:
+        	res_tmp = tmp
+    f.close()
+

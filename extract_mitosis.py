@@ -19,22 +19,28 @@ def convert_img_to_nparray(file):
 			train = numpy.vstack((train,img[i,j]/float(255)))
 
 	train = numpy.delete(train,0,0)
-	print len(train)
 	return train			
 
 def cut_mitosis(file,res):
-	dir = "/home/keiohigh2nd/icpr2014/A04/frames/x40/"
+	#Be careful this DIRECTORY
+	dir = "/home/keiohigh2nd/icpr2014/A05/frames/x40/"
 	name = file + ".tiff"
 	src = cv2.imread(dir+name, 1)
 	i = 0
 	for x in res:
-		dst = src[int(x[1]):int(x[1])+100, int(x[0]):int(x[0])+100]
-		name = str(i) + name
-		cv2.imwrite(name,dst)
-		i += 1
+		ty = int(x[1])-50
+		tx = int(x[0])-50
+		#Careful for the size of image
+		if ty >= 50 and tx >=50:
+			dst = src[ty:int(x[1])+50, tx:int(x[0])+50]
+			name = str(i) + name
+			print name
+			print "pepe"
+			cv2.imwrite(name,dst)
+			print "pepe1"
+			i += 1
 
 def read_csv(file):
-	print file
         f = open(file)
 	data = f.read()
 	if not data:
@@ -45,7 +51,7 @@ def read_csv(file):
         for x in lines:
 		if x:
                 	tmp = x.split(",")
-			print tmp
+                	print tmp
                 	res_tmp = []
 			res_tmp.append(tmp[0])
 			res_tmp.append(tmp[1])
@@ -58,14 +64,15 @@ def read_foldr(foldr):
 	current = os.getcwd()
 
 	for file in files:
-		if int(file.find("not")) == int(-1) and int(file.find("jpg")) == int(-1):
+		if int(file.find("not")) == int(-1) and  int(file.find("jpg")) == int(-1):
 			tmp = foldr + "/"
+			res = []
 			res = read_csv(tmp+file)
 			if res != 1:
 				cut_mitosis(file[0:8],res)
-		print file[0:8]
 
 
 if __name__ == "__main__":
-	read_foldr("/home/keiohigh2nd/icpr2014/A04/mitosis")
-	
+	#read_foldr("/home/keiohigh2nd/icpr2014/A05/mitosis")
+
+	convert_img_to_nparray("test.jpg")	

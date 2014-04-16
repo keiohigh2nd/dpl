@@ -9,5 +9,6 @@ Theano/
 *.csv
 *.cpp
 *.out
+*.tiff
 *pyc
 

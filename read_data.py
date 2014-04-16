@@ -39,12 +39,12 @@ def chip_data_dif(a,b):
 
 def convert():
 	#tranform GXX to XX
-	f = open("DREAM5_NetworkInference_GoldStandard_Network1_200_1.csv")
+	f = open("DREAM5_NetworkInference_GoldStandard_Network3_300.csv")
 	tmp_f = f.read()
 	lines = tmp_f.split("\r")
 	f.close()
 
-	f1 = open("Nw1_G_200_1.csv","w")
+	f1 = open("Nw3_G_300.csv","w")
 	for x in lines:
 		tmp = x.split(",")
 		f1.write(tmp[0].strip("G"))

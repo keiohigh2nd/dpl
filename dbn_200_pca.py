@@ -352,6 +352,12 @@ class LogisticRegression(object):
         return softmax(numpy.dot(x, self.W) + self.b)
  
  
+def gene_pca(res):
+	from sklearn.decomposition import PCA
+	pca = PCA(n_components=10)
+	pca.fit(res)
+	return pca.explained_variance_ratio_
+
 
 def chip_data(num):
         f = open("Nw1_Ex_10_S.csv")
@@ -431,37 +437,6 @@ def get_average_test(a,b):
 
         return ave/len(lines)
 
-def get_fisrt_one_train(a,b):
-        f = open("Network1_expression_data.csv")
-        tmp_f = f.read()
-        lines = tmp_f.split("\r")
-        f.close()
-
-        ave = 0
-	i = 0
-        for x in lines:
-                if int(x.find("G")) == int(-1):
-                        tmp = x.split(",")
-                        tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
-			ave += float(tmp_d)
-
-        return ave/len(lines)	
-
-def get_first_one_test(a,b):
-        f = open("Network3_expression_data.csv")
-        tmp_f = f.read()
-        lines = tmp_f.split("\r")
-        f.close()
-
-        ave = 0
-        for x in lines:
-                if int(x.find("G")) == int(-1):
-                        tmp = x.split(",")
-                        tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
-                        ave += float(tmp_d)
-
-        return ave/len(lines)
-
 
 def chip_data_dif_test(a,b):
         threshold = 0.08
@@ -492,6 +467,7 @@ def chip_data_dif_test(a,b):
 				#numpy.hstack((res,1))
                 i += 1
 		
+	gene_pca(res)
         return res
 
 def chip_data_dif_train(a,b):
@@ -522,8 +498,66 @@ def chip_data_dif_train(a,b):
                                 res = numpy.append(res,0)
                                 #numpy.hstack((res,1))
                 i += 1
-
+	print "test"
+	print res
+	gene_pca(res)
         return res
+
+def raw_chip_data_add_test(a,b):
+        #threshold = 0.08
+        #threshold = get_first_one_train(a,b)
+        threshold = get_average_train(a,b)
+        #threshold = get_median_train(a,b)
+
+        f = open("Network3_expression_data.csv")
+        tmp_f = f.read()
+        lines = tmp_f.split("\r")
+        f.close()
+
+        arr = []
+        i = 0
+        #res = numpy.zeros(len(lines))
+        #res = numpy.array([])
+        res_a = numpy.array([])
+        res_b = numpy.array([])
+        for x in lines:
+                if int(x.find("G")) == int(-1):
+                        tmp = x.split(",")
+                        res_a = numpy.append(res_a,tmp[int(a)])
+                        res_b = numpy.append(res_b,tmp[int(b)])
+        res = numpy.vstack((res_a,res_b))
+        return gene_pca(res)
+        #return res
+
+def raw_chip_data_add_train(a,b):
+        #threshold = 0.08
+        #threshold = get_first_one_train(a,b)
+        threshold = get_average_train(a,b)
+        #threshold = get_median_train(a,b)
+
+        f = open("Network1_expression_data.csv")
+        tmp_f = f.read()
+        lines = tmp_f.split("\r")
+        f.close()
+
+        arr = []
+        i = 0
+        #res = numpy.zeros(len(lines))
+        #res = numpy.array([])
+        res_a = numpy.array([])
+        res_b = numpy.array([])
+        for x in lines:
+                if int(x.find("G")) == int(-1):
+                        tmp = x.split(",")
+                        res_a = numpy.append(res_a,tmp[int(a)])
+                        res_b = numpy.append(res_b,tmp[int(b)])
+        res = numpy.vstack((res_a,res_b))
+        return gene_pca(res)
+        #return res
+
+
+
+
 
 def chip_data_add_test(a,b):
         #threshold = 0.08
@@ -539,20 +573,23 @@ def chip_data_add_test(a,b):
         arr = []
         i = 0
         #res = numpy.zeros(len(lines))
-        res = numpy.array([])
+        #res = numpy.array([])
+	res_a = numpy.array([])
+	res_b = numpy.array([])
         for x in lines:
                 if int(x.find("G")) == int(-1):
                         tmp = x.split(",")
                         if float(tmp[int(a)]) >= threshold:
-                                res = numpy.append(res,1)
+                                res_a = numpy.append(res_a,1)
                         else:
-                                res = numpy.append(res,0)
+                                res_a = numpy.append(res_a,0)
                         if float(tmp[int(b)]) >= threshold:
-                                res = numpy.append(res,1)
+                                res_b = numpy.append(res_b,1)
                         else:
-                                res = numpy.append(res,0)
+                                res_b = numpy.append(res_b,0)
                 i += 1
-
+	res = numpy.vstack((res_a,res_b))
+	print gene_pca(res)
         return res
 
 
@@ -570,20 +607,24 @@ def chip_data_add_train(a,b):
         arr = []
         i = 0
         #res = numpy.zeros(len(lines))
-        res = numpy.array([])
+        #res = numpy.array([])
+	res_a = numpy.array([])
+        res_b = numpy.array([])
         for x in lines:
                 if int(x.find("G")) == int(-1):
                         tmp = x.split(",")
                         if float(tmp[int(a)]) >= threshold:
-				res = numpy.append(res,1)
+				res_a = numpy.append(res_a,1)
 			else:
-                                res = numpy.append(res,0)
+                                res_a = numpy.append(res_a,0)
                         if float(tmp[int(b)]) >= threshold:
-                                res = numpy.append(res,1)
+                                res_b = numpy.append(res_b,1)
                         else:
-                                res = numpy.append(res,0)
+                                res_b = numpy.append(res_b,0)
                 i += 1
 
+	res = numpy.vstack((res_a,res_b))
+	gene_pca(res)
         return res
                      
 
@@ -623,7 +664,7 @@ def gene_data():
         
 	#This means RESIZE
 	#If you use chip_data_add, you have to 2 times
-	train = numpy.array(numpy.zeros(cols*2))
+	train = numpy.array(numpy.zeros(2))
         res_train = numpy.array([[0, 10]])
 	
 	#res_train = numpy.concatenate((res_train,numpy.array([[1,0]])),axis=0)
@@ -635,7 +676,7 @@ def gene_data():
                 #numpy.column_stack((train,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
 		try:
 			if tmp[0].strip("G").isdigit() == True & tmp[1].strip("G").isdigit() == True:
-                		train = numpy.vstack((train,chip_data_add_train(int(tmp[0])-1,int(tmp[1])-1)))
+                		train = numpy.vstack((train,raw_chip_data_add_train(int(tmp[0])-1,int(tmp[1])-1)))
                 		if int(tmp[2].strip()) == 0:
 					#res_train = numpy.concatenate((res_train,numpy.array([[1,0]])))
 					res_train = numpy.vstack((res_train,numpy.array([1,0])))
@@ -691,7 +732,7 @@ def gene_test():
         combi = list(itertools.combinations(range(cols), 2))
 
         #This means RESIZE
-        test = numpy.array(numpy.zeros(cols*2))
+        test = numpy.array(numpy.zeros(2))
         res_test = numpy.array([[0, 10]])
 
         #res_test = numpy.concatenate((res_test,numpy.array([[1,0]])),axis=0)
@@ -703,7 +744,7 @@ def gene_test():
                 #numpy.column_stack((test,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
 		try:
 			if tmp[0].strip("G").isdigit() == True & tmp[1].strip("G").isdigit() == True:
-                		test = numpy.vstack((test,chip_data_add_test(int(float(tmp[0].strip("G")))-1,int(float(tmp[1].strip("G")))-1)))
+                		test = numpy.vstack((test,raw_chip_data_add_test(int(float(tmp[0].strip("G")))-1,int(float(tmp[1].strip("G")))-1)))
                 		if int(tmp[2].strip()) == 0:
                         		#res_test = numpy.concatenate((res_test,numpy.array([[1,0]])))
                         		res_test = numpy.vstack((res_test,numpy.array([1,0])))
@@ -777,7 +818,8 @@ def change_binary(x):
 		return 1
 		
 
-def test_dbn(pretrain_lr, pretraining_epochs, k, finetune_lr, finetune_epochs, num_lays, num_units):
+def test_dbn(pretrain_lr=0.1, pretraining_epochs=1000, k=1, \
+             finetune_lr=0.1, finetune_epochs=200):
     import time
     start = time.clock()
 
@@ -787,7 +829,7 @@ def test_dbn(pretrain_lr, pretraining_epochs, k, finetune_lr, finetune_epochs, n
     rng = numpy.random.RandomState(123)
 
     # construct DBN
-    dbn = DBN(input=x, label=y, n_ins=num_expression, hidden_layer_sizes=[num_lays, num_units], n_outs=2, numpy_rng=rng)
+    dbn = DBN(input=x, label=y, n_ins=2, hidden_layer_sizes=[4, 120], n_outs=2, numpy_rng=rng)
 
  
     # pre-training (TrainUnsupervisedDBN)
@@ -805,31 +847,13 @@ def test_dbn(pretrain_lr, pretraining_epochs, k, finetune_lr, finetune_epochs, n
     for x in test:
     	res.append(dbn.predict(x))
 
-    res_calc = calc_accuracy(res,res_test)
+    calc_accuracy(res,res_test)
 
     end = time.clock()
     tom = end-start
     print "Takes",tom
 
-    return res_calc
  
 if __name__ == "__main__":
-    import random
-
-    f = open("run_res.txt","w")
-
-    res_tmp = 0
-    while res_tmp <= 0.7:
-	i = random.randint(4,200)
-    	j = random.randint(200,100000) 
-	print i
-	print j
-    	tmp = test_dbn(0.1,1000,1,0.1,200,i,j)
-	if res_tmp <= tmp:
-		res_tmp = tmp
-		f.write(i)
-		f.write("\t")
-		f.write(j)
-		f.write("\n")
-
-    f.close()
+    chip_data_add_train(1,2)
+    test_dbn()

@@ -137,13 +137,12 @@ class DBN(object):
             # self.finetune_cost = self.log_layer.negative_log_likelihood()
             # print >> sys.stderr, 'Training epoch %d, cost is ' % epoch, self.finetune_cost
             
-            lr *= 0.94
+            lr *= 0.95
             epoch += 1
  
  
     def predict(self, x):
         layer_input = x
-        
         for i in xrange(self.n_layers):
             sigmoid_layer = self.sigmoid_layers[i]
             # rbm_layer = self.rbm_layers[i]
@@ -319,7 +318,7 @@ class RBM(object):
         h = sigmoid(numpy.dot(v, self.W) + self.hbias)
         reconstructed_v = sigmoid(numpy.dot(h, self.W.T) + self.vbias)
         return reconstructed_v
- 
+
  
 class LogisticRegression(object):
     def __init__(self, input, label, n_in, n_out):
@@ -361,106 +360,6 @@ def chip_data(num):
                 tmp = x.split("\t")
                 arr.append(tmp[num])
         return arr
-
-def get_median_train(a,b):
-        f = open("Network1_expression_data.csv")
-        tmp_f = f.read()
-        lines = tmp_f.split("\r")
-        f.close()
-
-        max = 0
-	min = 10
-        for x in lines:
-                if int(x.find("G")) == int(-1):
-                        tmp = x.split(",")
-                        tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
-                        if tmp_d >= max:
-				max = tmp_d
-			if tmp_d <= min:
-				min = tmp_d
-
-        return float(max+min)/2
-
-def get_median_test(a,b):
-        f = open("Network3_expression_data.csv")
-        tmp_f = f.read()
-        lines = tmp_f.split("\r")
-        f.close()
-
-        max = 0
-        min = 10
-        for x in lines:
-                if int(x.find("G")) == int(-1):
-                        tmp = x.split(",")
-                        tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
-                        if tmp_d >= max:
-                                max = tmp_d
-                        if tmp_d <= min:
-                                min = tmp_d
-
-        return float(max+min)/2
-
-
-def get_average_train(a,b):
-        f = open("Network1_expression_data.csv")
-        tmp_f = f.read()
-        lines = tmp_f.split("\r")
-        f.close()
-
-        ave = 0
-        for x in lines:
-                if int(x.find("G")) == int(-1):
-                        tmp = x.split(",")
-                        tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
-                        ave += float(tmp_d)
-
-        return ave/len(lines)
-
-def get_average_test(a,b):
-        f = open("Network3_expression_data.csv")
-        tmp_f = f.read()
-        lines = tmp_f.split("\r")
-        f.close()
-
-        ave = 0
-        for x in lines:
-                if int(x.find("G")) == int(-1):
-                        tmp = x.split(",")
-                        tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
-                        ave += float(tmp_d)
-
-        return ave/len(lines)
-
-def get_fisrt_one_train(a,b):
-        f = open("Network1_expression_data.csv")
-        tmp_f = f.read()
-        lines = tmp_f.split("\r")
-        f.close()
-
-        ave = 0
-	i = 0
-        for x in lines:
-                if int(x.find("G")) == int(-1):
-                        tmp = x.split(",")
-                        tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
-			ave += float(tmp_d)
-
-        return ave/len(lines)	
-
-def get_first_one_test(a,b):
-        f = open("Network3_expression_data.csv")
-        tmp_f = f.read()
-        lines = tmp_f.split("\r")
-        f.close()
-
-        ave = 0
-        for x in lines:
-                if int(x.find("G")) == int(-1):
-                        tmp = x.split(",")
-                        tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
-                        ave += float(tmp_d)
-
-        return ave/len(lines)
 
 
 def chip_data_dif_test(a,b):
@@ -525,11 +424,22 @@ def chip_data_dif_train(a,b):
 
         return res
 
+def sort_array(arr):
+	arr_sort = numpy.sort(arr, axis=None)
+	res = numpy.array(numpy.zeros(arr.size))
+
+	for i in xrange(arr_sort.size):
+		if i <= 30:
+			for j in xrange(arr.size):
+				if float(arr_sort[-i]) == float(arr[j]):
+					res[j] = 1
+	return res	
+
+				
+	
+
 def chip_data_add_test(a,b):
-        #threshold = 0.08
-        #threshold = get_first_one_train(a,b)
-        threshold = get_average_train(a,b)
-        #threshold = get_median_train(a,b)
+        threshold = 0.08
 
         f = open("Network3_expression_data.csv")
         tmp_f = f.read()
@@ -543,24 +453,15 @@ def chip_data_add_test(a,b):
         for x in lines:
                 if int(x.find("G")) == int(-1):
                         tmp = x.split(",")
-                        if float(tmp[int(a)]) >= threshold:
-                                res = numpy.append(res,1)
-                        else:
-                                res = numpy.append(res,0)
-                        if float(tmp[int(b)]) >= threshold:
-                                res = numpy.append(res,1)
-                        else:
-                                res = numpy.append(res,0)
+			#tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
+                        res = numpy.append(res,math.fabs(float(tmp[int(a)])-float(tmp[int(b)])))
                 i += 1
 
-        return res
+        return sort_array(res)
 
 
 def chip_data_add_train(a,b):
-        #threshold = 0.08
-        #threshold = get_first_one_train(a,b)
-        threshold = get_average_train(a,b)
-        #threshold = get_median_train(a,b)
+        threshold = 0.08
 
         f = open("Network1_expression_data.csv")
         tmp_f = f.read()
@@ -574,24 +475,13 @@ def chip_data_add_train(a,b):
         for x in lines:
                 if int(x.find("G")) == int(-1):
                         tmp = x.split(",")
-                        if float(tmp[int(a)]) >= threshold:
-				res = numpy.append(res,1)
-			else:
-                                res = numpy.append(res,0)
-                        if float(tmp[int(b)]) >= threshold:
-                                res = numpy.append(res,1)
-                        else:
-                                res = numpy.append(res,0)
+			#tmp_d = math.fabs(float(tmp[int(a)])-float(tmp[int(b)]))
+                        res = numpy.append(res, math.fabs(float(tmp[int(a)])-float(tmp[int(b)])))
                 i += 1
 
-        return res
+        return sort_array(res)
                      
 
-def limited_for_train(a,b):
-	if a < 30 and b < 30:
-		return 1
-	else:
-		return 0
 
 def gene_data():
 	import itertools
@@ -602,7 +492,7 @@ def gene_data():
 	2:
 	"""
         
-	f = open("Network1_expression_data.csv")
+	f = open("Network3_expression_data.csv")
         tmp_f = f.read()
 	lines = tmp_f.split("\r")
         f.close()
@@ -615,7 +505,7 @@ def gene_data():
 	print "Number of column Genes = %d"%num_genes
 	
         #THIS IS CSV. \R and , are keys.Don't forget to run read.py convert()
-        f1 = open("Nw1_G_200.csv")
+        f1 = open("Nw3_G_800.csv")
 	tmp_f1 = f1.read()
         lins = tmp_f1.split("\r")
         f1.close()
@@ -623,24 +513,26 @@ def gene_data():
         
 	#This means RESIZE
 	#If you use chip_data_add, you have to 2 times
-	train = numpy.array(numpy.zeros(cols*2))
+	train = numpy.array(numpy.zeros(cols))
         res_train = numpy.array([[0, 10]])
-	
+
+	print cols	
+	print train[0].size
 	#res_train = numpy.concatenate((res_train,numpy.array([[1,0]])),axis=0)
 	#res_train = numpy.concatenate((res_train,numpy.array([[1,0]])))
          
 	i = 0
 	for y in lins:
                 tmp =  y.split(",")
-                #numpy.column_stack((train,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
 		try:
+                	#numpy.column_stack((train,chip_data_dif(int(tmp[0].strip("G"))-1,int(tmp[1].strip("G"))-1)))
 			if tmp[0].strip("G").isdigit() == True & tmp[1].strip("G").isdigit() == True:
-                		train = numpy.vstack((train,chip_data_add_train(int(tmp[0])-1,int(tmp[1])-1)))
+                		train = numpy.vstack((train,chip_data_add_test(int(tmp[0])-1,int(tmp[1])-1)))
                 		if int(tmp[2].strip()) == 0:
 					#res_train = numpy.concatenate((res_train,numpy.array([[1,0]])))
 					res_train = numpy.vstack((res_train,numpy.array([1,0])))
                 		else:
-                        		res_train = numpy.vstack((res_train,numpy.array([0,1])))
+                       			res_train = numpy.vstack((res_train,numpy.array([0,1])))
                 	i += 1
 		except:
 			print "error----",y
@@ -684,15 +576,17 @@ def gene_test():
         print "Number of column Genes = %d"%num_genes
 
         #GOLD_Standard_Data_THIS IS CSV. \R and , are keys.Don't forget to run read.py convert()
-        f1 = open("Nw3_G_200.csv")
+        f1 = open("Nw3_G_800_1.csv")
         tmp_f1 = f1.read()
         lins = tmp_f1.split("\r")
         f1.close()
         combi = list(itertools.combinations(range(cols), 2))
 
         #This means RESIZE
-        test = numpy.array(numpy.zeros(cols*2))
+	#IF you you use chip_add_data, you have to 2 times
+        test = numpy.array(numpy.zeros(cols))
         res_test = numpy.array([[0, 10]])
+	#res_test = numpy.array(numpy.zeros(10))
 
         #res_test = numpy.concatenate((res_test,numpy.array([[1,0]])),axis=0)
         #res_test = numpy.concatenate((res_test,numpy.array([[1,0]])))
@@ -708,7 +602,7 @@ def gene_test():
                         		#res_test = numpy.concatenate((res_test,numpy.array([[1,0]])))
                         		res_test = numpy.vstack((res_test,numpy.array([1,0])))
                 		else:
-                        		res_test = numpy.vstack((res_test,numpy.array([0,1])))
+					res_test = numpy.vstack((res_test,numpy.array([0,1])))
                 	i += 1
 
 		except:
@@ -816,20 +710,23 @@ def test_dbn(pretrain_lr, pretraining_epochs, k, finetune_lr, finetune_epochs, n
 if __name__ == "__main__":
     import random
 
-    f = open("run_res.txt","w")
 
     res_tmp = 0
     while res_tmp <= 0.7:
-	i = random.randint(4,200)
-    	j = random.randint(200,100000) 
+	#i = random.randint(7,20)
+	i = 15
+    	j = random.randint(2300,3500) 
 	print i
 	print j
-    	tmp = test_dbn(0.1,1000,1,0.1,200,i,j)
+    	tmp = test_dbn(0.0001,1000,1,0.0001,200,i,j)
+    	f = open("run_res_800.txt","a+")
+	f.write(str(i))
+	f.write("\t")
+	f.write(str(j))
+	f.write("\t")
+	f.write(str(tmp))
+	f.write("\n")
+    	f.close()
 	if res_tmp <= tmp:
 		res_tmp = tmp
-		f.write(i)
-		f.write("\t")
-		f.write(j)
-		f.write("\n")
 
-    f.close()
