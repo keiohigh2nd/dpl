@@ -24,11 +24,11 @@ def make_train_and_test(ratio, file):
   lines = f.readlines()
   f.close()
 
-  test_file = "test_" + tmp_file
-  test = open(test_file, "w")
+  test_file = "test_Nw3.csv" 
+  test = open(test_file, "a+")
 
-  train_file = "train_" + tmp_file
-  train = open(train_file, "w")
+  train_file = "train_Nw3.csv"
+  train = open(train_file, "a+")
 
   i = 0
   max = len(lines)*ratio
@@ -43,7 +43,13 @@ def make_train_and_test(ratio, file):
   train.close()      
 
 if __name__ == "__main__":
-  #get_sample(100,400, "1_DREAM5_NetworkInference_GoldStandard_Network3.csv")
-  #get_sample(100,400, "0_DREAM5_NetworkInference_GoldStandard_Network3.csv")
- 
-  make_train_and_test(0.8, "1_DREAM5_NetworkInference_GoldStandard_Network3.csv") 
+  Num_Paths = 200
+  Num_Genes = 500
+
+  get_sample(Num_Paths, Num_Genes, "1_DREAM5_NetworkInference_GoldStandard_Network3.csv")
+  get_sample(Num_Paths, Num_Genes, "0_DREAM5_NetworkInference_GoldStandard_Network3.csv")
+
+  ##File is always overwritten. If you change the parameter, please remove test and train_Nw3.csv
+  train_ratio = 0.8 
+  make_train_and_test(train_ratio, "1_DREAM5_NetworkInference_GoldStandard_Network3.csv") 
+  make_train_and_test(train_ratio, "0_DREAM5_NetworkInference_GoldStandard_Network3.csv") 
