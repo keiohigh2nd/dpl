@@ -1,5 +1,12 @@
 BLAS/
 Theano/
+data/
+etc/
+cpp/
+cv/
+output/
+sda/
+dae/
 *.txt
 *tgz
 *.pkl
